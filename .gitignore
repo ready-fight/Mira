@@ -1,0 +1,49 @@
+# Unreal Engine generated files
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio generated files
+.vs/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code local settings
+.vscode/
+
+# Compilation artifacts
+*.obj
+*.pdb
+*.ipch
+*.iobj
+*.ipdb
+*.log
+
+# Unreal crash and profiling data
+crashinfo--*
+Profiling/
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Keep Unreal project sources and assets tracked:
+# Config/, Content/, Plugins/, Source/, and *.uproject
