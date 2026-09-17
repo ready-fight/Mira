@@ -6,25 +6,36 @@
 #include "GameFramework/Character.h"
 #include "MiraCharacter.generated.h"
 
+class AItemPickup;
+class UInputAction;
+
 UCLASS()
 class MIRA_API AMiraCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(VisibleInstanceOnly, Category = "Interaction")
+	TObjectPtr<AItemPickup> NearbyItem;
+
 public:
-	// Sets default values for this character's properties
 	AMiraCharacter();
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void SetNearbyItem(AItemPickup* Item);
+	void ClearNearbyItem(AItemPickup* Item);
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void Interact();
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(
+		EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category = "Input",
+		meta = (AllowPrivateAccess = "true")
+	)
+	TObjectPtr<UInputAction> InteractAction;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };

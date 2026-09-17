@@ -3,6 +3,9 @@
 
 #include "MiraCharacter.h"
 
+#include "EnhancedInputComponent.h"
+#include "ItemPickup.h"
+
 // Sets default values
 AMiraCharacter::AMiraCharacter()
 {
@@ -29,5 +32,43 @@ void AMiraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	UEnhancedInputComponent* EnhancedInputComponent =
+		Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
+	if (EnhancedInputComponent && InteractAction)
+	{
+		EnhancedInputComponent->BindAction(
+			InteractAction,
+			ETriggerEvent::Started,
+			this,
+			&AMiraCharacter::Interact
+		);
+	}
 }
 
+void AMiraCharacter::SetNearbyItem(AItemPickup* Item)
+{
+	NearbyItem = Item;
+
+	UE_LOG(
+		LogTemp,
+		Warning,
+		TEXT("After assignment: NearbyItem=%s"),
+		*GetNameSafe(NearbyItem.Get())
+	);
+}
+
+void AMiraCharacter::ClearNearbyItem(AItemPickup* Item)
+{
+	if (NearbyItem == Item)
+	{
+		NearbyItem = nullptr;
+	}
+}
+
+void AMiraCharacter::Interact()
+{	if (IsValid(NearbyItem))
+	{
+		NearbyItem->Interact(this);
+	}
+}
