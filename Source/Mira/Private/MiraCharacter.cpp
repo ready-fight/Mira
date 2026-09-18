@@ -44,18 +44,24 @@ void AMiraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			&AMiraCharacter::Interact
 		);
 	}
+
+	if (EnhancedInputComponent && AttackAction)
+	{
+		EnhancedInputComponent->BindAction(
+			AttackAction,
+			ETriggerEvent::Started,
+			this,
+			&AMiraCharacter::Attack
+		);
+	}
 }
 
 void AMiraCharacter::SetNearbyItem(AItemPickup* Item)
 {
-	NearbyItem = Item;
-
-	UE_LOG(
-		LogTemp,
-		Warning,
-		TEXT("After assignment: NearbyItem=%s"),
-		*GetNameSafe(NearbyItem.Get())
-	);
+	if (IsValid(Item))
+	{
+		NearbyItem = Item;
+	}
 }
 
 void AMiraCharacter::ClearNearbyItem(AItemPickup* Item)
@@ -71,4 +77,18 @@ void AMiraCharacter::Interact()
 	{
 		NearbyItem->Interact(this);
 	}
+}
+
+void AMiraCharacter::Attack()
+{
+	if (!bIsAttacking)
+	{
+		bIsAttacking = true;
+		OnAttack();
+	}
+}
+
+void AMiraCharacter::NotifyAttackAnimationFinished()
+{
+	bIsAttacking = false;
 }

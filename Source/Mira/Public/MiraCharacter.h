@@ -18,16 +18,8 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Interaction")
 	TObjectPtr<AItemPickup> NearbyItem;
 
-public:
-	AMiraCharacter();
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void SetNearbyItem(AItemPickup* Item);
-	void ClearNearbyItem(AItemPickup* Item);
-
-protected:
-	virtual void BeginPlay() override;
-	void Interact();
+	UPROPERTY(VisibleInstanceOnly, Category = "Attack")
+	bool bIsAttacking = false;
 
 	UPROPERTY(
 		EditDefaultsOnly,
@@ -37,5 +29,30 @@ protected:
 	)
 	TObjectPtr<UInputAction> InteractAction;
 
+	UPROPERTY(
+		EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category = "Input",
+		meta = (AllowPrivateAccess = "true")
+	)
+	TObjectPtr<UInputAction> AttackAction;
 
+public:
+	AMiraCharacter();
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void SetNearbyItem(AItemPickup* Item);
+	void ClearNearbyItem(AItemPickup* Item);
+
+
+protected:
+	virtual void BeginPlay() override;
+	void Interact();
+	void Attack();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Attack")
+	void OnAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void NotifyAttackAnimationFinished();
 };
