@@ -15,6 +15,12 @@ class MIRA_API AMiraCharacter : public ACharacter
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
+	float MaxHealth = 100.f;
+
+	float CurrentHealth = MaxHealth;
+
+
 	UPROPERTY(VisibleInstanceOnly, Category = "Interaction")
 	TObjectPtr<AItemPickup> NearbyItem;
 
@@ -37,13 +43,18 @@ private:
 	)
 	TObjectPtr<UInputAction> AttackAction;
 
+	bool bIsDead;
+
 public:
 	AMiraCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void SetNearbyItem(AItemPickup* Item);
 	void ClearNearbyItem(AItemPickup* Item);
-
+	void Heal(float Health);
+	void Damage(float Damage);
+	UFUNCTION(BlueprintPure, Category = "Health")
+	bool IsDead() const { return bIsDead; }
 
 protected:
 	virtual void BeginPlay() override;

@@ -2,7 +2,7 @@
 
 
 #include "MiraCharacter.h"
-
+#include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "ItemPickup.h"
 
@@ -18,6 +18,7 @@ AMiraCharacter::AMiraCharacter()
 void AMiraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 // Called every frame
@@ -71,6 +72,28 @@ void AMiraCharacter::ClearNearbyItem(AItemPickup* Item)
 		NearbyItem = nullptr;
 	}
 }
+
+void AMiraCharacter::Heal(float Health)
+{
+
+	CurrentHealth = FMath::Min(CurrentHealth + Health, this->MaxHealth);
+}
+
+void AMiraCharacter::Damage(float Damage)
+{
+
+	if (bIsDead) return;
+
+	CurrentHealth = FMath::Max(CurrentHealth - Damage, 0.0f);
+
+	if (CurrentHealth <= 0)
+	{
+		bIsDead = true;
+		GetCharacterMovement()->DisableMovement();
+	}
+}
+
+
 
 void AMiraCharacter::Interact()
 {	if (IsValid(NearbyItem))
