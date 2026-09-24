@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "MiraCharacter.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "TimerManager.h"
 #include "MiraEnemy.generated.h"
@@ -16,8 +16,8 @@ class MIRA_API AMiraEnemy : public ACharacter
 private:
     enum class EMoveState : uint8
     {
-        Idle,
         Chasing,
+        Attacking,
         ReturningHome,
         AtHome
     };
@@ -28,13 +28,16 @@ private:
     FRotator StartRotation;
     FTimerHandle DistanceTimerHandle;
 
+    bool bIsAttacking = false;
     bool bIsReturningRotation = false;
-    ACharacter* Player = nullptr;
+    AMiraCharacter* Player = nullptr;
     AAIController* AI = nullptr;
 
     void UpdatePlayerDistance();
     float CheckPlayerDistance();
     void OnMoveFinished(FAIRequestID RequestID, const FPathFollowingResult& Result);
+    bool IsAttacking() { return bIsAttacking; }
+
 
 public:
     AMiraEnemy();
@@ -43,5 +46,11 @@ public:
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 protected:
+    UFUNCTION(BlueprintCallable)
+    void NotifyAttackFinished();
+    UFUNCTION(BlueprintCallable)
+    void NotifyDealDamage();
+    UFUNCTION(BlueprintImplementableEvent, Category = "Attack")
+    void OnAttack();
     virtual void BeginPlay() override;
 };

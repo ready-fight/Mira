@@ -18,6 +18,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float MaxHealth = 100.f;
 
+	UPROPERTY(
+		BlueprintReadOnly,
+		meta = (AllowPrivateAccess = "true")
+	)
 	float CurrentHealth = MaxHealth;
 
 
@@ -52,9 +56,11 @@ public:
 	void SetNearbyItem(AItemPickup* Item);
 	void ClearNearbyItem(AItemPickup* Item);
 	void Heal(float Health);
-	void Damage(float Damage);
+	UFUNCTION(BlueprintCallable)
+	void TakeDamage(float Damage);
 	UFUNCTION(BlueprintPure, Category = "Health")
-	bool IsDead() const { return bIsDead; }
+	bool IsDead() { return bIsDead; }
+	float GetCurrentHealath() { return CurrentHealth; }
 
 protected:
 	virtual void BeginPlay() override;

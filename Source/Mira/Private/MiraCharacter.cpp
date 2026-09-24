@@ -79,7 +79,7 @@ void AMiraCharacter::Heal(float Health)
 	CurrentHealth = FMath::Min(CurrentHealth + Health, this->MaxHealth);
 }
 
-void AMiraCharacter::Damage(float Damage)
+void AMiraCharacter::TakeDamage(float Damage)
 {
 
 	if (bIsDead) return;
@@ -91,9 +91,17 @@ void AMiraCharacter::Damage(float Damage)
 		bIsDead = true;
 		GetCharacterMovement()->DisableMovement();
 	}
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			2.0f,
+			FColor::Green,
+			FString::Printf(TEXT("Health: %.1f"), CurrentHealth)
+		);
+	}
 }
-
-
 
 void AMiraCharacter::Interact()
 {	if (IsValid(NearbyItem))

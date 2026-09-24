@@ -19,17 +19,24 @@ void AMiraEnemy::UpdatePlayerDistance()
 
 	const float Distance = CheckPlayerDistance();
 
-	if (Distance <= 350.0f)
+	if (Distance <= 150.0f && !Player->IsDead())
 	{
 
 		bIsReturningRotation = false;
 
-		if (MoveState != EMoveState::Idle) {
-			MoveState = EMoveState::Idle;
+		if (MoveState != EMoveState::Attacking) {
+			MoveState = EMoveState::Attacking;
 			AI->StopMovement();
 		}
+
+		if (!bIsAttacking) {
+			OnAttack();
+			bIsAttacking = true;
+		}
+
+
 	}
-	else if (Distance <= 1000.0f)
+	else if (Distance <= 1000.0f && !Player->IsDead())
 	{
 		bIsReturningRotation = false;
 
@@ -63,12 +70,12 @@ void AMiraEnemy::OnMoveFinished(
 				bIsReturningRotation = true;
 				break;
 			default:
-				MoveState = EMoveState::Idle;
+				MoveState = EMoveState::ReturningHome;
 		}
 	}
 	else
 	{
-		MoveState = EMoveState::Idle;
+		MoveState = EMoveState::ReturningHome;
 	}
 }
 
@@ -82,7 +89,9 @@ void AMiraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	Player = Cast<AMiraCharacter>(
+		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)
+	);
 	AI = Cast<AAIController>(GetController());
 
 	StartLocation = this->GetActorLocation();
@@ -140,5 +149,14 @@ void AMiraEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AMiraEnemy::NotifyAttackFinished()
+{
+	bIsAttacking = false;
+}
+
+void AMiraEnemy::NotifyDealDamage() {
+	Player->TakeDamage(10.0f);
 }
 
