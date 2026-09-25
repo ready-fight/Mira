@@ -13,23 +13,12 @@ UCLASS()
 class MIRA_API AMiraCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float MaxHealth = 100.f;
 
-	UPROPERTY(
-		BlueprintReadOnly,
-		meta = (AllowPrivateAccess = "true")
-	)
-	float CurrentHealth = MaxHealth;
-
-
 	UPROPERTY(VisibleInstanceOnly, Category = "Interaction")
 	TObjectPtr<AItemPickup> NearbyItem;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Attack")
-	bool bIsAttacking = false;
 
 	UPROPERTY(
 		EditDefaultsOnly,
@@ -47,7 +36,10 @@ private:
 	)
 	TObjectPtr<UInputAction> AttackAction;
 
+private:
+	float CurrentHealth = MaxHealth;
 	bool bIsDead;
+	bool bIsAttacking = false;
 
 public:
 	AMiraCharacter();

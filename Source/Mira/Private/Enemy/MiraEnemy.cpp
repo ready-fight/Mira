@@ -4,6 +4,7 @@
 #include "Enemy/MiraEnemy.h"
 
 #include "AIController.h"
+#include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -18,39 +19,58 @@ void AMiraEnemy::UpdatePlayerDistance()
 	}
 
 	const float Distance = CheckPlayerDistance();
+	const bool bCanInteract = !Player->IsDead() && Distance <= 1000.f;
 
-	if (Distance <= 150.0f && !Player->IsDead())
-	{
-
-		bIsReturningRotation = false;
-
-		if (MoveState != EMoveState::Attacking) {
-			MoveState = EMoveState::Attacking;
-			AI->StopMovement();
-		}
-
-		if (!bIsAttacking) {
-			OnAttack();
-			bIsAttacking = true;
-		}
-
-
-	}
-	else if (Distance <= 1000.0f && !Player->IsDead())
-	{
-		bIsReturningRotation = false;
-
-		if (MoveState != EMoveState::Chasing)
+	if (bCanInteract) {
+		if (Distance <= 150.0f) // Start Attacking
 		{
-			MoveState = EMoveState::Chasing;
-			AI->MoveToActor(Player, 100.0f);
+			if (MoveState != EMoveState::Attacking) {
+				MoveState = EMoveState::Attacking;
+				AI->StopMovement();
+			}
+
+			if (!bIsAttacking && !bAttackOnCooldown) {
+				bIsAttacking = true;
+				OnAttack();
+			}
 		}
-	}
-	else if (MoveState != EMoveState::ReturningHome && MoveState != EMoveState::AtHome)
-	{
+
+		else // Start Chasing
+		{
+			if (MoveState != EMoveState::Chasing)
+			{
+				MoveState = EMoveState::Chasing;
+				AI->MoveToActor(Player, 100.0f);
+			}
+		}
+
+	} else if (MoveState != EMoveState::ReturningHome && MoveState != EMoveState::AtHome) {
 		MoveState = EMoveState::ReturningHome;
 		AI->MoveToLocation(StartLocation, 50.0f);
 	}
+
+	const TCHAR* StateName = TEXT("Unknown");
+
+	switch (MoveState)
+	{
+	case EMoveState::Chasing:
+		StateName = TEXT("Chasing");
+		break;
+	case EMoveState::Attacking:
+		StateName = TEXT("Attacking");
+		break;
+	case EMoveState::ReturningHome:
+		StateName = TEXT("ReturningHome");
+		break;
+	case EMoveState::AtHome:
+		StateName = TEXT("AtHome");
+		break;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("State: %s | Attacking: %s | Cooldown: %s"),
+		StateName,
+		bIsAttacking ? TEXT("true") : TEXT("false"),
+		bAttackOnCooldown ? TEXT("true") : TEXT("false"));
 }
 
 float AMiraEnemy::CheckPlayerDistance()
@@ -62,21 +82,13 @@ void AMiraEnemy::OnMoveFinished(
 	FAIRequestID RequestID,
 	const FPathFollowingResult& Result)
 {
-	if (Result.IsSuccess())
-	{
-		switch (MoveState) {
-			case EMoveState::ReturningHome:
+		if (Result.IsSuccess())
+		{
+			if (MoveState == EMoveState::ReturningHome) {
 				MoveState = EMoveState::AtHome;
 				bIsReturningRotation = true;
-				break;
-			default:
-				MoveState = EMoveState::ReturningHome;
+			}
 		}
-	}
-	else
-	{
-		MoveState = EMoveState::ReturningHome;
-	}
 }
 
 AMiraEnemy::AMiraEnemy()
@@ -154,6 +166,20 @@ void AMiraEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 void AMiraEnemy::NotifyAttackFinished()
 {
 	bIsAttacking = false;
+	bAttackOnCooldown = true;
+
+	GetWorldTimerManager().SetTimer(
+		AttackCooldownTimerHandle,
+		this,
+		&AMiraEnemy::FinishAttackCooldown,
+		AttackCooldown,
+		false
+	);
+}
+
+void AMiraEnemy::FinishAttackCooldown()
+{
+	bAttackOnCooldown = false;
 }
 
 void AMiraEnemy::NotifyDealDamage() {
